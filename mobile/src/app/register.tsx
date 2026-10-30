@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, ErrorText, Field, Screen, Txt } from '../components/ui';
+import { Button, ErrorText, Field, Hint, Screen, Txt } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { PASSWORD_MAX, PASSWORD_MIN, confirmProblem, isValidEmail, passwordProblem } from '../lib/validation';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -12,14 +13,14 @@ export default function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
-  const valid = email.trim().length > 0 && password.length >= 8 && password === confirm;
+  const emailOk = isValidEmail(email);
+  const passwordError = passwordProblem(password);
+  const confirmError = confirmProblem(password, confirm);
+  const valid = emailOk && password.length >= PASSWORD_MIN && !passwordError && password === confirm;
 
   async function signUp() {
     setError(null);
     setInfo(null);
-    if (password !== confirm) return setError('Las contraseñas no coinciden.');
-    if (password.length < 8) return setError('La contraseña debe tener al menos 8 caracteres.');
-
     setLoading(true);
     const { data, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -31,7 +32,7 @@ export default function RegisterScreen() {
     if (authError) {
       setError(
         authError.message.toLowerCase().includes('already')
-          ? 'Ya existe una cuenta con ese correo.'
+          ? 'Ya existe una cuenta con ese correo. Inicia sesión o recupera tu contraseña.'
           : 'No pudimos crear la cuenta. Revisa los datos e intenta de nuevo.',
       );
       return;
@@ -56,8 +57,41 @@ export default function RegisterScreen() {
             value={email}
             onChangeText={setEmail}
           />
-          <Field placeholder="Contraseña (mínimo 8)" secureTextEntry autoComplete="new-password" value={password} onChangeText={setPassword} />
-          <Field placeholder="Repite la contraseña" secureTextEntry autoComplete="new-password" value={confirm} onChangeText={setConfirm} />
+          <Hint
+            message={email.length === 0 ? 'Escribe tu correo, por ejemplo nombre@dominio.com' : emailOk ? 'Correo válido' : 'Falta el @ o el dominio, por ejemplo nombre@dominio.com'}
+            tone={email.length === 0 ? 'muted' : emailOk ? 'ok' : 'error'}
+          />
+
+          <Field
+            placeholder={`Contraseña (${PASSWORD_MIN} a ${PASSWORD_MAX} caracteres)`}
+            secureTextEntry
+            autoComplete="new-password"
+            maxLength={PASSWORD_MAX}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <Hint
+            message={
+              password.length === 0
+                ? `${PASSWORD_MIN} caracteres como mínimo`
+                : passwordError ?? `${password.length} de ${PASSWORD_MAX} caracteres · contraseña válida`
+            }
+            tone={password.length === 0 ? 'muted' : passwordError ? 'error' : 'ok'}
+          />
+
+          <Field
+            placeholder="Repite la contraseña"
+            secureTextEntry
+            autoComplete="new-password"
+            maxLength={PASSWORD_MAX}
+            value={confirm}
+            onChangeText={setConfirm}
+          />
+          <Hint
+            message={confirm.length === 0 ? null : confirmError ?? 'Las contraseñas coinciden'}
+            tone={confirmError ? 'error' : 'ok'}
+          />
+
           <ErrorText message={error} />
           {info ? <Txt style={styles.info}>{info}</Txt> : null}
           <Button label="Crear cuenta" onPress={signUp} loading={loading} disabled={!valid} />
@@ -69,6 +103,6 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  form: { gap: 12, marginTop: 24 },
+  form: { gap: 10, marginTop: 24 },
   info: { fontSize: 14, lineHeight: 20 },
 });

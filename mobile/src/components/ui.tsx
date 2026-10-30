@@ -138,6 +138,14 @@ export function ErrorText({ message }: { message?: string | null }) {
   return <Text style={styles.error}>{message}</Text>;
 }
 
+// Pista debajo de un campo: gris por defecto, coral si es un problema, y verde cuando está bien.
+export function Hint({ message, tone = 'muted' }: { message?: string | null; tone?: 'muted' | 'error' | 'ok' }) {
+  const t = useTheme();
+  if (!message) return null;
+  const color = { muted: t.muted, error: palette.coral, ok: '#0E6B52' }[tone];
+  return <Text style={[styles.hint, { color }]}>{message}</Text>;
+}
+
 export function EmptyState({ title, body }: { title: string; body: string }) {
   const t = useTheme();
   return (
@@ -170,6 +178,7 @@ const styles = StyleSheet.create({
   buttonText: { fontSize: 15, fontWeight: '700' },
   input: { borderWidth: 1, borderRadius: 16, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
   error: { color: palette.coral, fontSize: 14 },
+  hint: { fontSize: 13, marginTop: -4, marginLeft: 4 },
   empty: { borderRadius: 24, borderWidth: 1, padding: 24, alignItems: 'center', gap: 8 },
   emptyShape: {
     width: 56,

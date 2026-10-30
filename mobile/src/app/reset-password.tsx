@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Button, ErrorText, Field, Screen, Txt } from '../components/ui';
+import { Button, ErrorText, Field, Hint, Screen, Txt } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { PASSWORD_MAX, PASSWORD_MIN, confirmProblem, passwordProblem } from '../lib/validation';
 
 // La sesión de recuperación la crea la raíz al recibir el enlace (ver _layout.tsx).
 // Aquí solo comprobamos que exista antes de pedir la nueva contraseña.
@@ -22,7 +23,9 @@ export default function ResetPasswordScreen() {
     supabase.auth.getSession().then(({ data }) => setReady(!!data.session));
   }, [expired]);
 
-  const valid = password.length >= 8 && password === confirm;
+  const passwordError = passwordProblem(password);
+  const confirmError = confirmProblem(password, confirm);
+  const valid = password.length >= PASSWORD_MIN && !passwordError && password === confirm;
 
   async function updatePassword() {
     setError(null);
@@ -47,8 +50,34 @@ export default function ResetPasswordScreen() {
           ) : null}
           {ready && !done ? (
             <>
-              <Field placeholder="Nueva contraseña (mínimo 8)" secureTextEntry autoComplete="new-password" value={password} onChangeText={setPassword} />
-              <Field placeholder="Repite la contraseña" secureTextEntry autoComplete="new-password" value={confirm} onChangeText={setConfirm} />
+              <Field
+                placeholder={`Nueva contraseña (${PASSWORD_MIN} a ${PASSWORD_MAX} caracteres)`}
+                secureTextEntry
+                autoComplete="new-password"
+                maxLength={PASSWORD_MAX}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <Hint
+                message={
+                  password.length === 0
+                    ? `${PASSWORD_MIN} caracteres como mínimo`
+                    : passwordError ?? `${password.length} de ${PASSWORD_MAX} caracteres · contraseña válida`
+                }
+                tone={password.length === 0 ? 'muted' : passwordError ? 'error' : 'ok'}
+              />
+              <Field
+                placeholder="Repite la contraseña"
+                secureTextEntry
+                autoComplete="new-password"
+                maxLength={PASSWORD_MAX}
+                value={confirm}
+                onChangeText={setConfirm}
+              />
+              <Hint
+                message={confirm.length === 0 ? null : confirmError ?? 'Las contraseñas coinciden'}
+                tone={confirmError ? 'error' : 'ok'}
+              />
               <Button label="Guardar contraseña" onPress={updatePassword} loading={loading} disabled={!valid} />
             </>
           ) : null}

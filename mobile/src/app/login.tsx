@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, ErrorText, Field, Screen } from '../components/ui';
+import { Button, ErrorText, Field, Hint, Screen } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { PASSWORD_MAX, isValidEmail } from '../lib/validation';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -30,7 +31,11 @@ export default function LoginScreen() {
             value={email}
             onChangeText={setEmail}
           />
-          <Field placeholder="Contraseña" secureTextEntry autoComplete="password" value={password} onChangeText={setPassword} />
+          <Hint
+            message={email.length === 0 ? null : isValidEmail(email) ? null : 'Revisa el correo: falta el @ o el dominio'}
+            tone="error"
+          />
+          <Field placeholder="Contraseña" secureTextEntry autoComplete="password" maxLength={PASSWORD_MAX} value={password} onChangeText={setPassword} />
           <ErrorText message={error} />
           <Button label="Entrar" onPress={signIn} loading={loading} disabled={!email || !password} />
           <Button label="Olvidé mi contraseña" variant="ghost" onPress={() => router.push('/forgot-password')} />

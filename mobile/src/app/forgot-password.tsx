@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, ErrorText, Field, Screen, Txt } from '../components/ui';
+import { Button, ErrorText, Field, Hint, Screen, Txt } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { isValidEmail } from '../lib/validation';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -43,8 +44,12 @@ export default function ForgotPasswordScreen() {
                 value={email}
                 onChangeText={setEmail}
               />
+              <Hint
+                message={email.length === 0 ? 'Escribe el correo con el que te registraste' : isValidEmail(email) ? 'Correo válido' : 'Falta el @ o el dominio, por ejemplo nombre@dominio.com'}
+                tone={email.length === 0 ? 'muted' : isValidEmail(email) ? 'ok' : 'error'}
+              />
               <ErrorText message={error} />
-              <Button label="Enviar enlace" onPress={sendLink} loading={loading} disabled={!email.trim()} />
+              <Button label="Enviar enlace" onPress={sendLink} loading={loading} disabled={!isValidEmail(email)} />
             </>
           )}
           <Button label="Volver a iniciar sesión" variant="ghost" onPress={() => router.replace('/login')} />

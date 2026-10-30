@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Button, Card, ErrorText, Field, Screen, Txt } from '../../components/ui';
+import { Button, Card, ErrorText, Field, Hint, Screen, Txt } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { money } from '../../lib/format';
 import { useCreateBuilding, useCurrentBuilding, useSummary } from '../../lib/queries';
@@ -68,8 +68,12 @@ function CreateFirstBuilding() {
       <Card>
         <Txt>Con el edificio creado podrás agregar departamentos y generar las cuotas del mes.</Txt>
         <View style={styles.form}>
-          <Field placeholder="Nombre, p. ej. Edificio Los Álamos" value={name} onChangeText={setName} />
-          <Field placeholder="Dirección" value={address} onChangeText={setAddress} />
+          <Field placeholder="Nombre, p. ej. Edificio Los Álamos" maxLength={120} value={name} onChangeText={setName} />
+          <Hint message={name.trim() ? `${name.length} de 120 caracteres` : 'Escribe el nombre con el que lo reconocerán los vecinos'} />
+          <Field placeholder="Dirección" maxLength={200} value={address} onChangeText={setAddress} />
+          <Hint
+            message={address.trim() ? `${address.length} de 200 caracteres` : 'Calle y número, p. ej. Av. Javier Prado 1234'}
+          />
           <ErrorText message={create.error?.message} />
           <Button
             label="Crear edificio"
