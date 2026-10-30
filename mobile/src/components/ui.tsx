@@ -64,8 +64,8 @@ export function Card({ children, tone = 'surface' }: { children: ReactNode; tone
   const colors = {
     surface: { bg: t.surface, fg: t.fg, border: t.line },
     dark: { bg: t.inverse, fg: t.inverseFg, border: 'transparent' },
-    coral: { bg: palette.coral, fg: palette.midnight, border: 'transparent' },
-    mint: { bg: palette.mint, fg: palette.midnight, border: 'transparent' },
+    coral: { bg: palette.coral, fg: palette.ink, border: 'transparent' },
+    mint: { bg: palette.mint, fg: palette.ink, border: 'transparent' },
   }[tone];
   return (
     <TextToneContext.Provider value={colors.fg}>
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 36, lineHeight: 40, letterSpacing: -1, fontFamily: fonts.display },
   card: { borderRadius: 28, borderWidth: 1, padding: 20, gap: 6, overflow: 'hidden' },
   pill: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3, marginTop: 4 },
-  pillText: { fontSize: 12, fontFamily: fonts.bodyBold, color: palette.midnight },
+  pillText: { fontSize: 12, fontFamily: fonts.bodyBold, color: palette.ink },
   button: {
     borderRadius: 999,
     borderWidth: 1,

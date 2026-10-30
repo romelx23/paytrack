@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { useTheme } from '../../theme/tokens';
+import { palette, useTheme } from '../../theme/tokens';
 
 export default function TabLayout() {
   const t = useTheme();
@@ -8,14 +8,14 @@ export default function TabLayout() {
   // Icono que cambia de color según la pestaña esté activa o no.
   const icon = (name: keyof typeof Ionicons.glyphMap) =>
     function TabIcon({ focused }: { focused: boolean }) {
-      return <Ionicons name={name} size={22} color={focused ? t.fg : t.muted} />;
+      return <Ionicons name={name} size={22} color={focused ? palette.mint : t.muted} />;
     };
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: t.fg,
+        tabBarActiveTintColor: palette.mint,
         tabBarInactiveTintColor: t.muted,
         tabBarStyle: { backgroundColor: t.bg, borderTopColor: t.line },
       }}
