@@ -1,46 +1,26 @@
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import * as Linking from 'expo-linking';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Button, ErrorText, Field, Screen, Txt } from '../components/ui';
 import { supabase } from '../lib/supabase';
 
-// El enlace del correo llega como paytrack://reset-password#access_token=...&refresh_token=...
-// Los tokens van en el fragmento (después de #), así que los leemos a mano.
-function readTokens(url: string) {
-  const hash = url.includes('#') ? url.split('#')[1] : '';
-  const params = Object.fromEntries(
-    hash.split('&').map((pair) => {
-      const [key, value = ''] = pair.split('=');
-      return [decodeURIComponent(key), decodeURIComponent(value)];
-    }),
-  );
-  return params.access_token && params.refresh_token
-    ? { accessToken: params.access_token, refreshToken: params.refresh_token }
-    : null;
-}
-
+// La sesión de recuperación la crea la raíz al recibir el enlace (ver _layout.tsx).
+// Aquí solo comprobamos que exista antes de pedir la nueva contraseña.
 export default function ResetPasswordScreen() {
-  const url = Linking.useURL();
+  const { expired } = useLocalSearchParams<{ expired?: string }>();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    expired ? 'El enlace venció o ya se usó. Pide uno nuevo.' : null,
+  );
   const [done, setDone] = useState(false);
 
-  // Al abrir el enlace, convertimos los tokens en una sesión de recuperación.
   useEffect(() => {
-    if (!url) return;
-    const tokens = readTokens(url);
-    if (!tokens) return;
-    supabase.auth
-      .setSession({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken })
-      .then(({ error: sessionError }) => {
-        if (sessionError) setError('El enlace venció o ya se usó. Pide uno nuevo.');
-        else setReady(true);
-      });
-  }, [url]);
+    if (expired) return;
+    supabase.auth.getSession().then(({ data }) => setReady(!!data.session));
+  }, [expired]);
 
   const valid = password.length >= 8 && password === confirm;
 

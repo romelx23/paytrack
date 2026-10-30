@@ -1,12 +1,33 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import * as Linking from 'expo-linking';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { handleRecoveryUrl } from '../lib/recovery';
 import { useSession } from '../lib/session';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { session, loading } = useSession();
+
+  // Esta capa siempre está montada, así que recibe el enlace del correo aunque llegue
+  // con la app abierta. Por eso el procesamiento vive aquí y no en la pantalla de recuperación.
+  useEffect(() => {
+    async function onUrl(url: string) {
+      try {
+        if (await handleRecoveryUrl(url)) router.replace('/reset-password');
+      } catch {
+        router.replace('/reset-password?expired=1');
+      }
+    }
+    Linking.getInitialURL().then((initial) => {
+      if (initial) onUrl(initial);
+    });
+    const subscription = Linking.addEventListener('url', ({ url }) => onUrl(url));
+    return () => subscription.remove();
+  }, []);
+
   if (loading) return null;
 
   return (
