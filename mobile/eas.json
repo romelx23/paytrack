@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://paytrack-jrrairgj5-romelx23s-projects.vercel.app",
+        "EXPO_PUBLIC_API_URL": "https://paytrack-api-romelx23s-projects.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://pwnehbanrstbhqaibyrm.supabase.co"
       }
     },
