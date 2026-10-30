@@ -36,6 +36,16 @@ export const dark: typeof light = {
   inverseFg: palette.midnight,
 };
 
+// Tipografía de marca: Sora para títulos, DM Sans para texto y Space Grotesk para importes.
+// Los nombres coinciden con los exports de @expo-google-fonts y se cargan en la raíz (_layout.tsx).
+export const fonts = {
+  display: 'Sora_800ExtraBold',
+  body: 'DMSans_400Regular',
+  bodyMedium: 'DMSans_500Medium',
+  bodyBold: 'DMSans_700Bold',
+  num: 'SpaceGrotesk_700Bold',
+} as const;
+
 export function useTheme() {
   return useColorScheme() === 'dark' ? dark : light;
 }

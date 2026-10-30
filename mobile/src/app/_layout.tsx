@@ -1,4 +1,12 @@
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
+import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
+import { Sora_800ExtraBold } from '@expo-google-fonts/sora';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
 import * as Linking from 'expo-linking';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -10,6 +18,13 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { session, loading } = useSession();
+  const [fontsLoaded] = useFonts({
+    Sora_800ExtraBold,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_700Bold,
+    SpaceGrotesk_700Bold,
+  });
 
   // Esta capa siempre está montada, así que recibe el enlace del correo aunque llegue
   // con la app abierta. Por eso el procesamiento vive aquí y no en la pantalla de recuperación.
@@ -28,7 +43,7 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, []);
 
-  if (loading) return null;
+  if (loading || !fontsLoaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -11,7 +11,7 @@ import {
   type TextProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette, useTheme } from '../theme/tokens';
+import { fonts, palette, useTheme } from '../theme/tokens';
 import type { ChargeStatus } from '../lib/types';
 
 // Color de texto que hereda cada tarjeta, para que el contenido se lea en cualquier tono.
@@ -21,7 +21,7 @@ const TextToneContext = createContext<string | null>(null);
 export function Txt({ style, ...props }: TextProps) {
   const t = useTheme();
   const tone = useContext(TextToneContext);
-  return <Text {...props} style={[{ color: tone ?? t.fg }, style]} />;
+  return <Text {...props} style={[{ color: tone ?? t.fg, fontFamily: fonts.body }, style]} />;
 }
 
 export function Screen({
@@ -161,11 +161,11 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { paddingHorizontal: 16, paddingBottom: 120, gap: 14 },
   header: { paddingTop: 8, gap: 2 },
-  eyebrow: { fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase' },
-  title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.5 },
-  card: { borderRadius: 22, borderWidth: 1, padding: 18, gap: 6 },
+  eyebrow: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: fonts.bodyMedium },
+  title: { fontSize: 36, lineHeight: 40, letterSpacing: -1, fontFamily: fonts.display },
+  card: { borderRadius: 28, borderWidth: 1, padding: 20, gap: 6, overflow: 'hidden' },
   pill: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3, marginTop: 4 },
-  pillText: { fontSize: 12, fontWeight: '700', color: palette.midnight },
+  pillText: { fontSize: 12, fontFamily: fonts.bodyBold, color: palette.midnight },
   button: {
     borderRadius: 999,
     borderWidth: 1,
@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 44,
   },
-  buttonText: { fontSize: 15, fontWeight: '700' },
-  input: { borderWidth: 1, borderRadius: 16, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
+  buttonText: { fontSize: 15, fontFamily: fonts.bodyBold },
+  input: { borderWidth: 1, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, fontFamily: fonts.body },
   error: { color: palette.coral, fontSize: 14 },
   hint: { fontSize: 13, marginTop: -4, marginLeft: 4 },
   empty: { borderRadius: 24, borderWidth: 1, padding: 24, alignItems: 'center', gap: 8 },
@@ -188,6 +188,6 @@ const styles = StyleSheet.create({
     backgroundColor: palette.lavender,
     marginBottom: 4,
   },
-  emptyTitle: { fontSize: 17, fontWeight: '700', textAlign: 'center' },
-  emptyBody: { fontSize: 14, textAlign: 'center' },
+  emptyTitle: { fontSize: 17, fontFamily: fonts.bodyBold, textAlign: 'center' },
+  emptyBody: { fontSize: 14, textAlign: 'center', fontFamily: fonts.body },
 });

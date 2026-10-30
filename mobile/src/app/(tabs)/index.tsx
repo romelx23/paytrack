@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button, Card, ErrorText, Field, Hint, Screen, Txt } from '../../components/ui';
+import { fonts, palette } from '../../theme/tokens';
 import { supabase } from '../../lib/supabase';
 import { money } from '../../lib/format';
 import { useCreateBuilding, useCurrentBuilding, useSummary } from '../../lib/queries';
@@ -25,6 +26,8 @@ function Dashboard({ buildingId, name, address, code }: { buildingId: string; na
   return (
     <Screen eyebrow={address} title={name}>
       <Card tone="dark">
+        <View style={styles.blobYellow} />
+        <View style={styles.blobCoral} />
         <Txt style={styles.label}>Total pendiente</Txt>
         <Txt style={styles.big}>{money(summary?.pendingCents ?? 0)}</Txt>
         <Txt style={styles.muted}>{summary?.openCharges ?? 0} cargos abiertos</Txt>
@@ -89,9 +92,11 @@ function CreateFirstBuilding() {
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 13, opacity: 0.8 },
-  big: { fontSize: 44, fontWeight: '800', letterSpacing: -1, fontVariant: ['tabular-nums'] },
-  amount: { fontSize: 20, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  label: { fontSize: 13, opacity: 0.8, fontFamily: fonts.bodyMedium },
+  big: { fontSize: 52, lineHeight: 58, letterSpacing: -1.5, fontFamily: fonts.num, marginTop: 4 },
+  amount: { fontSize: 22, fontFamily: fonts.num, fontVariant: ['tabular-nums'] },
+  blobYellow: { position: 'absolute', right: -50, bottom: -60, width: 170, height: 170, borderRadius: 85, backgroundColor: palette.yellow },
+  blobCoral: { position: 'absolute', right: 44, top: -22, width: 80, height: 40, borderBottomLeftRadius: 80, borderBottomRightRadius: 80, backgroundColor: palette.coral },
   muted: { fontSize: 13, opacity: 0.75 },
   code: { fontSize: 22, fontWeight: '800', letterSpacing: 2 },
   row: { flexDirection: 'row', gap: 12 },
