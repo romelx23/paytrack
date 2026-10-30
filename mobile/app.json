@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "PayTrack",
+    "slug": "paytrack",
+    "scheme": "paytrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.romel.paytrack"
+    },
+    "android": {
+      "package": "com.romel.paytrack",
+      "adaptiveIcon": {
+        "backgroundColor": "#14122B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "c6f0b7c8-c07c-4787-9ca6-0b36226891e9"
+      }
+    }
+  }
+}

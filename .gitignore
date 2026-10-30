@@ -1,0 +1,16 @@
+# dependencias y builds
+node_modules/
+dist/
+.expo/
+android/
+ios/
+
+# secretos
+.env
+.env.*
+!.env.example
+
+# sistema
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
