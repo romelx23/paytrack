@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { createContext, useContext, type ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -43,19 +44,21 @@ export function Screen({
     </View>
   );
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: t.bg }]} edges={['top']}>
-      {scroll ? (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {header}
-          {children}
-        </ScrollView>
-      ) : (
-        <View style={[styles.content, { flex: 1 }]}>
-          {header}
-          {children}
-        </View>
-      )}
-    </SafeAreaView>
+    <LinearGradient colors={t.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.screen}>
+      <SafeAreaView style={styles.screen} edges={['top']}>
+        {scroll ? (
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            {header}
+            {children}
+          </ScrollView>
+        ) : (
+          <View style={[styles.content, { flex: 1 }]}>
+            {header}
+            {children}
+          </View>
+        )}
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 

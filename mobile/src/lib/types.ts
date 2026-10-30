@@ -8,19 +8,19 @@ export type Building = {
   createdAt: string;
 };
 
-export type Unit = {
+export type Client = {
   id: string;
-  label: string;
-  residentName: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
 };
 
 export type ChargeStatus = 'pending' | 'overdue' | 'paid';
 
 export type Charge = {
   id: string;
-  unitLabel: string;
+  clientName: string;
   concept: string;
-  period: string;
   amountCents: number;
   dueDate: string;
   paidCents: number;

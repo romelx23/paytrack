@@ -10,14 +10,16 @@ import { useFonts } from 'expo-font';
 import * as Linking from 'expo-linking';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { handleRecoveryUrl } from '../lib/recovery';
+import { hasSeenOnboarding } from '../lib/onboarding';
 import { useSession } from '../lib/session';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { session, loading } = useSession();
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora_800ExtraBold,
     DMSans_400Regular,
@@ -25,6 +27,14 @@ export default function RootLayout() {
     DMSans_700Bold,
     SpaceGrotesk_700Bold,
   });
+
+  // Primera vez: mostramos el onboarding antes de iniciar sesión.
+  useEffect(() => {
+    hasSeenOnboarding().then((seen) => {
+      setOnboardingChecked(true);
+      if (!seen) router.replace('/onboarding');
+    });
+  }, []);
 
   // Esta capa siempre está montada, así que recibe el enlace del correo aunque llegue
   // con la app abierta. Por eso el procesamiento vive aquí y no en la pantalla de recuperación.
@@ -43,11 +53,11 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, []);
 
-  if (loading || !fontsLoaded) return null;
+  if (loading || !fontsLoaded || !onboardingChecked) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         {/* Stack.Protected muestra cada grupo solo si su guard se cumple y redirige solo. */}
         <Stack.Protected guard={!!session}>
@@ -58,8 +68,9 @@ export default function RootLayout() {
           <Stack.Screen name="register" />
           <Stack.Screen name="forgot-password" />
         </Stack.Protected>
-        {/* El enlace del correo puede abrir la app con o sin sesión, así que esta ruta no tiene guard. */}
+        {/* El enlace del correo y el onboarding pueden abrirse con o sin sesión, así que no tienen guard. */}
         <Stack.Screen name="reset-password" />
+        <Stack.Screen name="onboarding" />
       </Stack>
     </QueryClientProvider>
   );

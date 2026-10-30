@@ -1,7 +1,8 @@
-import { StyleSheet } from 'react-native';
-import { Card, EmptyState, Screen, Txt } from '../../components/ui';
+import { StyleSheet, Text, View } from 'react-native';
+import { EmptyState, Screen } from '../../components/ui';
 import { money } from '../../lib/format';
 import { useCharges, useCurrentBuilding, useSummary } from '../../lib/queries';
+import { fonts, palette } from '../../theme/tokens';
 
 export default function ActivityScreen() {
   const { building } = useCurrentBuilding();
@@ -11,38 +12,51 @@ export default function ActivityScreen() {
   if (!building) {
     return (
       <Screen title="Actividad">
-        <EmptyState title="Primero crea un edificio" body="Desde Inicio puedes crear tu edificio." />
+        <EmptyState title="Primero crea tu negocio" body="Desde Inicio puedes crearlo en un momento." />
       </Screen>
     );
   }
 
   return (
     <Screen eyebrow="Este mes" title="Actividad">
-      <Card tone="mint">
-        <Txt style={styles.label}>Recaudado este mes</Txt>
-        <Txt style={styles.big}>{money(summary.data?.collectedThisMonthCents ?? 0)}</Txt>
-      </Card>
+      <View style={styles.hero}>
+        <Text style={styles.heroLabel}>Recaudado este mes</Text>
+        <Text style={styles.heroAmount}>{money(summary.data?.collectedThisMonthCents ?? 0)}</Text>
+      </View>
 
-      <Txt style={styles.heading}>Cuotas cobradas</Txt>
-      {paid.data?.length === 0 ? <EmptyState title="Sin cobros completos" body="Cuando cobres una cuota aparecerá aquí." /> : null}
+      <Text style={styles.heading}>Cobros completos</Text>
+      {paid.data?.length === 0 ? <EmptyState title="Sin cobros completos" body="Cuando cobres un cobro aparecerá aquí." /> : null}
       {paid.data?.map((c) => (
-        <Card key={c.id}>
-          <Txt style={styles.unit}>{c.unitLabel}</Txt>
-          <Txt style={styles.muted}>
-            {c.concept} · {c.period}
-          </Txt>
-          <Txt style={styles.amount}>{money(c.amountCents)}</Txt>
-        </Card>
+        <View key={c.id} style={styles.row}>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={styles.name} numberOfLines={1}>
+              {c.clientName}
+            </Text>
+            <Text style={styles.sub} numberOfLines={1}>
+              {c.concept}
+            </Text>
+          </View>
+          <Text style={styles.amount}>{money(c.amountCents)}</Text>
+        </View>
       ))}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 13, opacity: 0.8 },
-  big: { fontSize: 36, fontWeight: '800', letterSpacing: -0.5, fontVariant: ['tabular-nums'] },
-  heading: { fontSize: 18, fontWeight: '800', marginTop: 6 },
-  unit: { fontSize: 17, fontWeight: '800' },
-  muted: { fontSize: 13, opacity: 0.7 },
-  amount: { fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  hero: { backgroundColor: palette.blue, borderRadius: 32, padding: 24, gap: 6 },
+  heroLabel: { fontSize: 14, fontFamily: fonts.bodyMedium, color: palette.white, opacity: 0.85 },
+  heroAmount: { fontSize: 44, fontFamily: fonts.num, color: palette.white, letterSpacing: -1 },
+  heading: { fontSize: 20, fontFamily: fonts.display, color: palette.ink, marginTop: 8 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: palette.lime,
+    borderRadius: 26,
+    padding: 18,
+  },
+  name: { fontSize: 17, fontFamily: fonts.bodyBold, color: palette.ink },
+  sub: { fontSize: 13, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
+  amount: { fontSize: 18, fontFamily: fonts.num, color: palette.ink },
 });

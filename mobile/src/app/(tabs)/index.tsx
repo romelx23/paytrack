@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, EmptyState, ErrorText, Field, Hint, Screen, Txt } from '../../components/ui';
+import { router } from 'expo-router';
+import { Button, EmptyState, ErrorText, Field, Hint, Screen, Txt } from '../../components/ui';
 import { fonts, palette } from '../../theme/tokens';
 import { supabase } from '../../lib/supabase';
 import { money } from '../../lib/format';
@@ -13,19 +14,15 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <Screen title="PayTrack">
-        <ActivityIndicator color={palette.mint} />
+        <ActivityIndicator color={palette.ink} />
       </Screen>
     );
   }
 
-  return building ? (
-    <Dashboard buildingId={building.id} name={building.name} address={building.address} code={building.inviteCode} />
-  ) : (
-    <CreateFirstBuilding />
-  );
+  return building ? <Dashboard buildingId={building.id} name={building.name} address={building.address} /> : <CreateFirstBuilding />;
 }
 
-function Dashboard({ buildingId, name, address, code }: { buildingId: string; name: string; address: string; code: string }) {
+function Dashboard({ buildingId, name, address }: { buildingId: string; name: string; address: string }) {
   const { data: summary } = useSummary(buildingId);
   const { data: charges = [] } = useCharges(buildingId);
   const open = charges.filter((c) => c.status !== 'paid');
@@ -34,16 +31,18 @@ function Dashboard({ buildingId, name, address, code }: { buildingId: string; na
   return (
     <Screen eyebrow={address} title={name}>
       <View style={styles.hero}>
-        <Txt style={styles.kicker}>Total por cobrar</Txt>
+        <Txt style={styles.kicker}>Por cobrar</Txt>
         <Text style={styles.big}>{money(summary?.pendingCents ?? 0)}</Text>
         <Txt style={styles.muted}>
-          {summary?.openCharges ?? 0} cargos abiertos · {money(summary?.overdueCents ?? 0)} vencidos
+          {summary?.openCharges ?? 0} cobros abiertos · {money(summary?.overdueCents ?? 0)} vencidos
         </Txt>
+        <View style={styles.heroBlob} />
+        <Button label="Nuevo cobro" variant="ghost" onPress={() => router.push('/cobros')} />
       </View>
 
-      <SectionTitle>Por cobrar</SectionTitle>
+      <Text style={styles.sectionTitle}>Pendientes</Text>
       {open.length === 0 ? (
-        <EmptyState title="Todo al día" body="No hay cobros pendientes. Genera las cuotas desde la pestaña Cobros." />
+        <EmptyState title="Todo cobrado" body="No hay cobros pendientes. Crea uno desde la pestaña Cobros." />
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tiles}>
           {open.map((c) => (
@@ -52,48 +51,36 @@ function Dashboard({ buildingId, name, address, code }: { buildingId: string; na
         </ScrollView>
       )}
 
-      <SectionTitle>Cobrados</SectionTitle>
+      <Text style={styles.sectionTitle}>Cobrados</Text>
       {paid.length === 0 ? <Txt style={styles.muted}>Aún no hay cobros completos.</Txt> : null}
       {paid.map((c) => (
         <View key={c.id} style={styles.paidBar}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={styles.paidTitle} numberOfLines={1}>
-              {c.unitLabel}
+              {c.clientName}
             </Text>
             <Text style={styles.paidSub} numberOfLines={1}>
-              {c.concept} · {c.period}
+              {c.concept}
             </Text>
           </View>
           <Text style={styles.paidAmount}>{money(c.amountCents)}</Text>
         </View>
       ))}
 
-      <Card>
-        <Txt style={styles.kicker}>Código del edificio</Txt>
-        <Txt style={styles.code} selectable>
-          {code}
-        </Txt>
-        <Txt style={styles.muted}>Los vecinos usarán este código, o su QR, para unirse. Próximamente.</Txt>
-      </Card>
-
       <Button label="Cerrar sesión" variant="ghost" onPress={() => supabase.auth.signOut()} />
     </Screen>
   );
 }
 
-function SectionTitle({ children }: { children: string }) {
-  return <Text style={styles.sectionTitle}>{children}</Text>;
-}
-
-// Tarjeta de color que muestra un cobro pendiente. El color depende de si está vencido.
+// Tarjeta de color para un cobro pendiente. El color cambia según el estado.
 function ChargeTile({ charge }: { charge: Charge }) {
   const overdue = charge.status === 'overdue';
   const bg = overdue ? palette.coral : palette.blue;
-  const fg = overdue ? palette.ink : palette.white;
+  const fg = palette.white;
   return (
     <View style={[styles.tile, { backgroundColor: bg }]}>
-      <Text style={[styles.tileLabel, { color: fg }]} numberOfLines={1}>
-        {charge.unitLabel}
+      <Text style={[styles.tileLabel, { color: fg }]} numberOfLines={2}>
+        {charge.clientName}
       </Text>
       <View>
         <Text style={[styles.tileStatus, { color: fg }]}>{overdue ? 'Vencido' : 'Pendiente'}</Text>
@@ -109,58 +96,65 @@ function CreateFirstBuilding() {
   const create = useCreateBuilding();
 
   return (
-    <Screen eyebrow="Primer paso" title="Crea tu cuenta">
-      <Card>
-        <Txt>Con el edificio creado podrás agregar departamentos y generar las cuotas del mes.</Txt>
-        <View style={styles.form}>
-          <Field placeholder="Nombre, p. ej. Edificio Los Álamos" maxLength={120} value={name} onChangeText={setName} />
-          <Hint message={name.trim() ? `${name.length} de 120 caracteres` : 'Escribe el nombre con el que lo reconocerán los vecinos'} />
-          <Field placeholder="Dirección" maxLength={200} value={address} onChangeText={setAddress} />
-          <Hint message={address.trim() ? `${address.length} de 200 caracteres` : 'Calle y número, p. ej. Av. Javier Prado 1234'} />
-          <ErrorText message={create.error?.message} />
-          <Button
-            label="Crear"
-            loading={create.isPending}
-            disabled={!name.trim() || !address.trim()}
-            onPress={() => create.mutate({ name: name.trim(), address: address.trim() })}
-          />
-        </View>
-      </Card>
+    <Screen eyebrow="Primer paso" title="Crea tu negocio">
+      <View style={styles.formCard}>
+        <Txt>Con tu negocio creado podrás agregar clientes y registrar cobros.</Txt>
+        <Field placeholder="Nombre del negocio" maxLength={120} value={name} onChangeText={setName} />
+        <Hint message={name.trim() ? `${name.length} de 120 caracteres` : 'Como lo conocen tus clientes'} />
+        <Field placeholder="Dirección o ciudad" maxLength={200} value={address} onChangeText={setAddress} />
+        <Hint message={address.trim() ? `${address.length} de 200 caracteres` : 'Dirección o ciudad, p. ej. Miraflores, Lima'} />
+        <ErrorText message={create.error?.message} />
+        <Button
+          label="Crear negocio"
+          loading={create.isPending}
+          disabled={!name.trim() || !address.trim()}
+          onPress={() => create.mutate({ name: name.trim(), address: address.trim() })}
+        />
+      </View>
       <Button label="Cerrar sesión" variant="ghost" onPress={() => supabase.auth.signOut()} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { gap: 6, marginTop: 8 },
-  kicker: { fontSize: 13, fontFamily: fonts.bodyMedium, opacity: 0.8 },
-  big: { fontSize: 60, lineHeight: 64, letterSpacing: -2, fontFamily: fonts.num, color: palette.mint },
-  muted: { fontSize: 14, opacity: 0.7 },
-  sectionTitle: { fontSize: 22, fontFamily: fonts.display, color: palette.white, marginTop: 14, letterSpacing: -0.5 },
-  tiles: { gap: 12, paddingRight: 16 },
-  tile: {
-    width: 190,
-    height: 190,
-    borderRadius: 32,
-    padding: 18,
-    justifyContent: 'space-between',
+  hero: {
+    backgroundColor: palette.ink,
+    borderRadius: 36,
+    padding: 24,
+    gap: 6,
+    overflow: 'hidden',
+    marginTop: 8,
   },
-  tileLabel: { fontSize: 20, fontFamily: fonts.display },
-  tileStatus: { fontSize: 13, fontFamily: fonts.bodyBold, opacity: 0.85 },
-  tileAmount: { fontSize: 26, fontFamily: fonts.num, letterSpacing: -0.5, marginTop: 2 },
+  heroBlob: {
+    position: 'absolute',
+    right: -40,
+    top: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: palette.yellow,
+    opacity: 0.9,
+  },
+  kicker: { fontSize: 14, fontFamily: fonts.bodyMedium, color: palette.white, opacity: 0.8 },
+  big: { fontSize: 56, lineHeight: 60, letterSpacing: -2, fontFamily: fonts.num, color: palette.lime },
+  muted: { fontSize: 14, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
+  sectionTitle: { fontSize: 22, fontFamily: fonts.display, color: palette.ink, marginTop: 14, letterSpacing: -0.5 },
+  tiles: { gap: 12, paddingRight: 16 },
+  tile: { width: 180, height: 180, borderRadius: 32, padding: 18, justifyContent: 'space-between' },
+  tileLabel: { fontSize: 19, fontFamily: fonts.display },
+  tileStatus: { fontSize: 13, fontFamily: fonts.bodyBold, opacity: 0.9 },
+  tileAmount: { fontSize: 24, fontFamily: fonts.num, letterSpacing: -0.5, marginTop: 2 },
   paidBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: palette.mint,
+    backgroundColor: palette.lime,
     borderRadius: 26,
     paddingHorizontal: 20,
     paddingVertical: 16,
-    minWidth: 0,
   },
   paidTitle: { fontSize: 17, fontFamily: fonts.bodyBold, color: palette.ink },
   paidSub: { fontSize: 13, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
   paidAmount: { fontSize: 17, fontFamily: fonts.num, color: palette.ink },
-  code: { fontSize: 24, fontFamily: fonts.num, letterSpacing: 2, color: palette.lime },
-  form: { gap: 10, marginTop: 10 },
+  formCard: { backgroundColor: palette.white, borderRadius: 30, padding: 20, gap: 10 },
 });

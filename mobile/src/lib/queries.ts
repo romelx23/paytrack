@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api } from './api';
-import type { Building, Charge, ChargeStatus, Summary, Unit } from './types';
+import type { Building, Charge, ChargeStatus, Client, Summary } from './types';
 
-// Tras cualquier escritura, refrescamos todo lo que depende del edificio.
-function invalidateBuildingData(queryClient: QueryClient) {
-  const keys = new Set(['buildings', 'summary', 'charges', 'units']);
+// Tras cualquier escritura, refrescamos todo lo que depende del negocio.
+function invalidateBusinessData(queryClient: QueryClient) {
+  const keys = new Set(['buildings', 'summary', 'charges', 'clients']);
   return queryClient.invalidateQueries({ predicate: (q) => keys.has(String(q.queryKey[0])) });
 }
 
@@ -15,7 +15,7 @@ export function useBuildings() {
   });
 }
 
-// Por ahora la app trabaja con un edificio: el primero del encargado.
+// Por ahora la app trabaja con un negocio: el primero del usuario.
 export function useCurrentBuilding() {
   const query = useBuildings();
   return { ...query, building: query.data?.[0] };
@@ -37,10 +37,10 @@ export function useCharges(buildingId?: string, status?: ChargeStatus) {
   });
 }
 
-export function useUnits(buildingId?: string) {
+export function useClients(buildingId?: string) {
   return useQuery({
-    queryKey: ['units', buildingId],
-    queryFn: () => api<Unit[]>(`/buildings/${buildingId}/units`),
+    queryKey: ['clients', buildingId],
+    queryFn: () => api<Client[]>(`/buildings/${buildingId}/clients`),
     enabled: !!buildingId,
   });
 }
@@ -50,28 +50,25 @@ export function useCreateBuilding() {
   return useMutation({
     mutationFn: (body: { name: string; address: string }) =>
       api<Building>('/buildings', { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => invalidateBuildingData(queryClient),
+    onSuccess: () => invalidateBusinessData(queryClient),
   });
 }
 
-export function useCreateUnit(buildingId?: string) {
+export function useCreateClient(buildingId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { label: string; residentName?: string }) =>
-      api<Unit>(`/buildings/${buildingId}/units`, { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => invalidateBuildingData(queryClient),
+    mutationFn: (body: { name: string; email?: string; phone?: string }) =>
+      api<Client>(`/buildings/${buildingId}/clients`, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => invalidateBusinessData(queryClient),
   });
 }
 
-export function useGenerateCharges(buildingId?: string) {
+export function useCreateCharge(buildingId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { period: string; concept: string; amountCents: number; dueDay: number }) =>
-      api<{ created: number }>(`/buildings/${buildingId}/charges/generate`, {
-        method: 'POST',
-        body: JSON.stringify(body),
-      }),
-    onSuccess: () => invalidateBuildingData(queryClient),
+    mutationFn: (body: { clientId: string; concept: string; amountCents: number; dueDate: string }) =>
+      api<Charge>(`/buildings/${buildingId}/charges`, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => invalidateBusinessData(queryClient),
   });
 }
 
@@ -87,6 +84,6 @@ export function usePayCharge(buildingId?: string) {
           idempotencyKey: vars.idempotencyKey,
         }),
       }),
-    onSuccess: () => invalidateBuildingData(queryClient),
+    onSuccess: () => invalidateBusinessData(queryClient),
   });
 }

@@ -22,7 +22,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: icon('home-outline') }} />
       <Tabs.Screen name="cobros" options={{ title: 'Cobros', tabBarIcon: icon('cash-outline') }} />
-      <Tabs.Screen name="departamentos" options={{ title: 'Deptos', tabBarIcon: icon('business-outline') }} />
+      <Tabs.Screen name="clientes" options={{ title: 'Clientes', tabBarIcon: icon('people-outline') }} />
       <Tabs.Screen name="actividad" options={{ title: 'Actividad', tabBarIcon: icon('pulse-outline') }} />
     </Tabs>
   );

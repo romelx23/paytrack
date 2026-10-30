@@ -1,29 +1,31 @@
 import { useColorScheme } from 'react-native';
 
-// Paleta de la referencia: fondo casi negro, verde menta como acento y colores de apoyo
-// vivos para tarjetas. Se usa el mismo tema en modo claro y oscuro para mantener la identidad.
+// Paleta: fondo claro con degradado verde-azul, tarjetas de colores vivos y texto oscuro.
+// Inspirada en las referencias de fintech con color. Se usa el mismo tema en modo claro y oscuro.
 export const palette = {
-  ink: '#0B0C10',
-  mint: '#7CF59B',
-  blue: '#3D5AFE',
-  coral: '#FF6B6B',
-  lime: '#D4FF5B',
-  lavender: '#A78BFA',
-  yellow: '#FFD60A',
+  ink: '#10231C',
   white: '#FFFFFF',
+  mint: '#6EE7B7',
+  lime: '#D9FF6B',
+  blue: '#4F6BFF',
+  coral: '#FF7A6B',
+  yellow: '#FFD166',
+  lavender: '#B9A7FF',
+  mintSoft: '#E4FBF1',
+  blueSoft: '#E6EDFF',
+  line: '#D7E3DE',
 };
 
 export const theme = {
-  bg: palette.ink,
-  surface: '#16171E',
-  fg: palette.white,
-  muted: '#8B8FA3',
-  line: '#262835',
-  softMint: '#1B3A26',
-  softCoral: '#4A2224',
-  softYellow: '#4A3D0C',
-  inverse: palette.mint,
-  inverseFg: palette.ink,
+  gradient: [palette.mintSoft, palette.blueSoft] as const,
+  bg: palette.mintSoft,
+  surface: palette.white,
+  fg: palette.ink,
+  muted: '#5C6B66',
+  line: '#D7E3DE',
+  inverse: palette.ink,
+  inverseFg: palette.white,
+  accent: palette.blue,
 };
 
 // Tipografía de marca: Sora para títulos, DM Sans para texto y Space Grotesk para importes.
@@ -36,7 +38,7 @@ export const fonts = {
   num: 'SpaceGrotesk_700Bold',
 } as const;
 
-// Se mantiene el hook para no tocar las pantallas, pero ya no cambia según el sistema.
+// Se mantiene el hook para no tocar las pantallas; el tema es el mismo en claro y oscuro.
 export function useTheme() {
   useColorScheme();
   return theme;
