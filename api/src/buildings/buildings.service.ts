@@ -2,12 +2,12 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { randomBytes } from 'node:crypto';
 import { DB, type Database } from '../db/database.module.js';
-import { buildings, charges, payments, units } from '../db/schema.js';
-import type { CreateBuildingDto, CreateUnitDto, GenerateChargesDto, RegisterPaymentDto } from './dto.js';
+import { buildings, charges, clients, payments } from '../db/schema.js';
+import type { CreateBuildingDto, CreateChargeDto, CreateClientDto, RegisterPaymentDto } from './dto.js';
 
 export type ChargeStatus = 'pending' | 'overdue' | 'paid';
 
-// Toda operación verifica que el edificio pertenezca al usuario autenticado.
+// Toda operación verifica que el negocio pertenezca al usuario autenticado.
 // La app móvil nunca toca las tablas: todo pasa por aquí.
 @Injectable()
 export class BuildingsService {
@@ -30,65 +30,60 @@ export class BuildingsService {
     return building;
   }
 
-  async listUnits(buildingId: string, ownerId: string) {
+  async listClients(buildingId: string, ownerId: string) {
     await this.assertOwner(buildingId, ownerId);
-    return this.db.select().from(units).where(eq(units.buildingId, buildingId)).orderBy(units.label);
+    return this.db.select().from(clients).where(eq(clients.buildingId, buildingId)).orderBy(clients.name);
   }
 
-  async createUnit(buildingId: string, ownerId: string, dto: CreateUnitDto) {
+  async createClient(buildingId: string, ownerId: string, dto: CreateClientDto) {
     await this.assertOwner(buildingId, ownerId);
-    const [unit] = await this.db
-      .insert(units)
-      .values({ buildingId, label: dto.label, residentName: dto.residentName ?? null })
+    const [client] = await this.db
+      .insert(clients)
+      .values({ buildingId, name: dto.name, email: dto.email ?? null, phone: dto.phone ?? null })
       .returning();
-    return unit;
+    return client;
   }
 
-  // Genera un cargo por departamento. Es idempotente: volver a ejecutarlo para el mismo
-  // periodo y concepto no duplica cargos gracias a la restricción única.
-  async generateCharges(buildingId: string, ownerId: string, dto: GenerateChargesDto) {
+  async createCharge(buildingId: string, ownerId: string, dto: CreateChargeDto) {
     await this.assertOwner(buildingId, ownerId);
-    const buildingUnits = await this.db.select({ id: units.id }).from(units).where(eq(units.buildingId, buildingId));
-    if (buildingUnits.length === 0) throw new BadRequestException('El edificio no tiene departamentos');
+    const [client] = await this.db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(and(eq(clients.id, dto.clientId), eq(clients.buildingId, buildingId)))
+      .limit(1);
+    if (!client) throw new BadRequestException('El cliente no pertenece a este negocio');
 
-    const dueDate = `${dto.period}-${String(dto.dueDay).padStart(2, '0')}`;
-    const inserted = await this.db
+    const [charge] = await this.db
       .insert(charges)
-      .values(
-        buildingUnits.map((u) => ({
-          buildingId,
-          unitId: u.id,
-          period: dto.period,
-          concept: dto.concept,
-          amountCents: dto.amountCents,
-          dueDate,
-        })),
-      )
-      .onConflictDoNothing()
-      .returning({ id: charges.id });
-
-    return { created: inserted.length };
+      .values({
+        buildingId,
+        clientId: dto.clientId,
+        concept: dto.concept,
+        amountCents: dto.amountCents,
+        dueDate: dto.dueDate,
+      })
+      .returning();
+    return charge;
   }
 
-  // Calcula el estado en el servidor a partir de pagos y fecha de vencimiento.
+  // El estado se calcula en el servidor a partir de pagos y fecha de vencimiento.
   async listCharges(buildingId: string, ownerId: string, status?: ChargeStatus) {
     await this.assertOwner(buildingId, ownerId);
     const rows = await this.db
       .select({
         id: charges.id,
-        unitLabel: units.label,
+        clientName: clients.name,
         concept: charges.concept,
-        period: charges.period,
         amountCents: charges.amountCents,
         dueDate: charges.dueDate,
         paidCents: sql<number>`coalesce(sum(${payments.amountCents}), 0)::int`,
       })
       .from(charges)
-      .innerJoin(units, eq(units.id, charges.unitId))
+      .innerJoin(clients, eq(clients.id, charges.clientId))
       .leftJoin(payments, eq(payments.chargeId, charges.id))
       .where(eq(charges.buildingId, buildingId))
-      .groupBy(charges.id, units.label)
-      .orderBy(desc(charges.dueDate), units.label);
+      .groupBy(charges.id, clients.name)
+      .orderBy(desc(charges.dueDate));
 
     const today = new Date().toISOString().slice(0, 10);
     const withStatus = rows.map((r) => {
@@ -109,12 +104,7 @@ export class BuildingsService {
       .select({ total: sql<number>`coalesce(sum(${payments.amountCents}), 0)::int` })
       .from(payments)
       .innerJoin(charges, eq(charges.id, payments.chargeId))
-      .where(
-        and(
-          eq(charges.buildingId, buildingId),
-          sql`${payments.paidAt} >= date_trunc('month', now())`,
-        ),
-      );
+      .where(and(eq(charges.buildingId, buildingId), sql`${payments.paidAt} >= date_trunc('month', now())`));
 
     return {
       pendingCents: sumOf(all.filter((c) => c.status === 'pending')),
@@ -133,7 +123,7 @@ export class BuildingsService {
         .innerJoin(buildings, eq(buildings.id, charges.buildingId))
         .where(and(eq(charges.id, chargeId), eq(buildings.ownerId, ownerId)))
         .for('update', { of: charges });
-      if (!owned) throw new NotFoundException('Cargo no encontrado');
+      if (!owned) throw new NotFoundException('Cobro no encontrado');
 
       const [existing] = await tx
         .select()
@@ -146,7 +136,7 @@ export class BuildingsService {
         .from(payments)
         .where(eq(payments.chargeId, chargeId));
       const remaining = owned.amountCents - paid;
-      if (remaining <= 0) throw new BadRequestException('El cargo ya está pagado');
+      if (remaining <= 0) throw new BadRequestException('El cobro ya está pagado');
       if (dto.amountCents > remaining) {
         throw new BadRequestException(`El monto excede el saldo pendiente de ${remaining} centavos`);
       }
@@ -165,6 +155,6 @@ export class BuildingsService {
       .from(buildings)
       .where(and(eq(buildings.id, buildingId), eq(buildings.ownerId, ownerId)))
       .limit(1);
-    if (!building) throw new NotFoundException('Edificio no encontrado');
+    if (!building) throw new NotFoundException('Negocio no encontrado');
   }
 }

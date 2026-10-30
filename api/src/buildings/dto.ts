@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsOptional, IsString, Matches, Max, Min, MaxLength } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, Min, MaxLength } from 'class-validator';
 
 export class CreateBuildingDto {
   @IsString() @IsNotEmpty() @MaxLength(120)
@@ -9,26 +9,29 @@ export class CreateBuildingDto {
   address!: string;
 }
 
-export class CreateUnitDto {
-  @IsString() @IsNotEmpty() @MaxLength(40)
-  label!: string;
+export class CreateClientDto {
+  @IsString() @IsNotEmpty() @MaxLength(120)
+  name!: string;
 
-  @IsOptional() @IsString() @MaxLength(120)
-  residentName?: string;
+  @IsOptional() @IsEmail() @MaxLength(160)
+  email?: string;
+
+  @IsOptional() @IsString() @MaxLength(30)
+  phone?: string;
 }
 
-export class GenerateChargesDto {
-  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'period debe tener formato AAAA-MM' })
-  period!: string;
+export class CreateChargeDto {
+  @IsUUID()
+  clientId!: string;
 
-  @IsString() @IsNotEmpty() @MaxLength(80)
+  @IsString() @IsNotEmpty() @MaxLength(120)
   concept!: string;
 
   @Type(() => Number) @IsInt() @Min(1)
   amountCents!: number;
 
-  @Type(() => Number) @IsInt() @Min(1) @Max(28)
-  dueDay!: number;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'dueDate debe tener formato AAAA-MM-DD' })
+  dueDate!: string;
 }
 
 export class RegisterPaymentDto {
