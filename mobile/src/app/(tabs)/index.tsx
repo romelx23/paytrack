@@ -41,7 +41,7 @@ function Dashboard({ buildingId, name, address }: { buildingId: string; name: st
       <View style={styles.hero}>
         <Txt style={styles.kicker}>Por cobrar</Txt>
         <Text style={styles.big}>{money(summary?.pendingCents ?? 0)}</Text>
-        <Txt style={styles.muted}>
+        <Txt style={styles.heroText}>
           {summary?.openCharges ?? 0} cobros abiertos · {money(summary?.overdueCents ?? 0)} vencidos
         </Txt>
         <View style={styles.heroBlob} />
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
   kicker: { fontSize: 14, fontFamily: fonts.bodyMedium, color: palette.white, opacity: 0.8 },
   big: { fontSize: 56, lineHeight: 60, letterSpacing: -2, fontFamily: fonts.num, color: palette.lime },
   muted: { fontSize: 14, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
+  heroText: { fontSize: 14, fontFamily: fonts.body, color: palette.white, opacity: 0.85 },
   sectionTitle: { fontSize: 22, fontFamily: fonts.display, color: palette.ink, marginTop: 14, letterSpacing: -0.5 },
   tiles: { gap: 12, paddingRight: 16 },
   tile: { width: 180, height: 180, borderRadius: 32, padding: 18, justifyContent: 'space-between' },
