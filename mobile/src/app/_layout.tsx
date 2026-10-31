@@ -62,6 +62,7 @@ export default function RootLayout() {
         {/* Stack.Protected muestra cada grupo solo si su guard se cumple y redirige solo. */}
         <Stack.Protected guard={!!session}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="ajustes" />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="login" />

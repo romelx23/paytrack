@@ -30,17 +30,22 @@ export function Screen({
   title,
   children,
   scroll = true,
+  headerRight,
 }: {
   eyebrow?: string;
   title: string;
   children: ReactNode;
   scroll?: boolean;
+  headerRight?: ReactNode;
 }) {
   const t = useTheme();
   const header = (
-    <View style={styles.header}>
-      {eyebrow ? <Txt style={[styles.eyebrow, { color: t.muted }]}>{eyebrow}</Txt> : null}
-      <Txt style={styles.title}>{title}</Txt>
+    <View style={styles.headerRow}>
+      <View style={[styles.header, { flex: 1, minWidth: 0 }]}>
+        {eyebrow ? <Txt style={[styles.eyebrow, { color: t.muted }]}>{eyebrow}</Txt> : null}
+        <Txt style={styles.title}>{title}</Txt>
+      </View>
+      {headerRight}
     </View>
   );
   return (
@@ -163,7 +168,8 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { paddingHorizontal: 16, paddingBottom: 120, gap: 14 },
-  header: { paddingTop: 8, gap: 2 },
+  headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, paddingTop: 8 },
+  header: { gap: 2 },
   eyebrow: { fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', fontFamily: fonts.bodyMedium },
   title: { fontSize: 36, lineHeight: 40, letterSpacing: -1, fontFamily: fonts.display },
   card: { borderRadius: 28, borderWidth: 1, padding: 20, gap: 6, overflow: 'hidden' },

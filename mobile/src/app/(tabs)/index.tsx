@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, EmptyState, ErrorText, Field, Hint, Screen, Txt } from '../../components/ui';
 import { fonts, palette } from '../../theme/tokens';
-import { supabase } from '../../lib/supabase';
 import { money } from '../../lib/format';
 import { useCharges, useCreateBuilding, useCurrentBuilding, useSummary } from '../../lib/queries';
 import type { Charge } from '../../lib/types';
@@ -22,6 +22,14 @@ export default function HomeScreen() {
   return building ? <Dashboard buildingId={building.id} name={building.name} address={building.address} /> : <CreateFirstBuilding />;
 }
 
+function SettingsButton() {
+  return (
+    <Pressable onPress={() => router.push('/ajustes')} accessibilityRole="button" accessibilityLabel="Ajustes" style={styles.settingsBtn}>
+      <Ionicons name="person-circle-outline" size={28} color={palette.ink} />
+    </Pressable>
+  );
+}
+
 function Dashboard({ buildingId, name, address }: { buildingId: string; name: string; address: string }) {
   const { data: summary } = useSummary(buildingId);
   const { data: charges = [] } = useCharges(buildingId);
@@ -29,7 +37,7 @@ function Dashboard({ buildingId, name, address }: { buildingId: string; name: st
   const paid = charges.filter((c) => c.status === 'paid');
 
   return (
-    <Screen eyebrow={address} title={name}>
+    <Screen eyebrow={address} title={name} headerRight={<SettingsButton />}>
       <View style={styles.hero}>
         <Txt style={styles.kicker}>Por cobrar</Txt>
         <Text style={styles.big}>{money(summary?.pendingCents ?? 0)}</Text>
@@ -67,7 +75,6 @@ function Dashboard({ buildingId, name, address }: { buildingId: string; name: st
         </View>
       ))}
 
-      <Button label="Cerrar sesión" variant="ghost" onPress={() => supabase.auth.signOut()} />
     </Screen>
   );
 }
@@ -96,7 +103,7 @@ function CreateFirstBuilding() {
   const create = useCreateBuilding();
 
   return (
-    <Screen eyebrow="Primer paso" title="Crea tu negocio">
+    <Screen eyebrow="Primer paso" title="Crea tu negocio" headerRight={<SettingsButton />}>
       <View style={styles.formCard}>
         <Txt>Con tu negocio creado podrás agregar clientes y registrar cobros.</Txt>
         <Field placeholder="Nombre del negocio" maxLength={120} value={name} onChangeText={setName} />
@@ -111,7 +118,6 @@ function CreateFirstBuilding() {
           onPress={() => create.mutate({ name: name.trim(), address: address.trim() })}
         />
       </View>
-      <Button label="Cerrar sesión" variant="ghost" onPress={() => supabase.auth.signOut()} />
     </Screen>
   );
 }
@@ -157,4 +163,5 @@ const styles = StyleSheet.create({
   paidSub: { fontSize: 13, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
   paidAmount: { fontSize: 17, fontFamily: fonts.num, color: palette.ink },
   formCard: { backgroundColor: palette.white, borderRadius: 30, padding: 20, gap: 10 },
+  settingsBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: palette.white, alignItems: 'center', justifyContent: 'center' },
 });
