@@ -63,6 +63,7 @@ export default function RootLayout() {
         <Stack.Protected guard={!!session}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="ajustes" />
+          <Stack.Screen name="nuevo-cobro" options={{ presentation: 'modal' }} />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="login" />

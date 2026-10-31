@@ -45,7 +45,10 @@ function Dashboard({ buildingId, name, address }: { buildingId: string; name: st
           {summary?.openCharges ?? 0} cobros abiertos · {money(summary?.overdueCents ?? 0)} vencidos
         </Txt>
         <View style={styles.heroBlob} />
-        <Button label="Nuevo cobro" variant="ghost" onPress={() => router.push('/cobros')} />
+        <Pressable onPress={() => router.push('/nuevo-cobro')} accessibilityRole="button" style={styles.newCharge}>
+          <Ionicons name="add" size={20} color={palette.ink} />
+          <Text style={styles.newChargeText}>Nuevo cobro</Text>
+        </Pressable>
       </View>
 
       <Text style={styles.sectionTitle}>Pendientes</Text>
@@ -144,6 +147,8 @@ const styles = StyleSheet.create({
   kicker: { fontSize: 14, fontFamily: fonts.bodyMedium, color: palette.white, opacity: 0.8 },
   big: { fontSize: 56, lineHeight: 60, letterSpacing: -2, fontFamily: fonts.num, color: palette.lime },
   muted: { fontSize: 14, fontFamily: fonts.body, color: palette.ink, opacity: 0.7 },
+  newCharge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, backgroundColor: palette.lime, borderRadius: 999, paddingVertical: 14 },
+  newChargeText: { fontSize: 16, fontFamily: fonts.bodyBold, color: palette.ink },
   heroText: { fontSize: 14, fontFamily: fonts.body, color: palette.white, opacity: 0.85 },
   sectionTitle: { fontSize: 22, fontFamily: fonts.display, color: palette.ink, marginTop: 14, letterSpacing: -0.5 },
   tiles: { gap: 12, paddingRight: 16 },
