@@ -9,6 +9,8 @@ ios/
 .env
 .env.*
 !.env.example
+google-service-account.json
+*-service-account*.json
 
 # sistema
 .DS_Store

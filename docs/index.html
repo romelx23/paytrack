@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PayTrack - Control de cobros</title>
+  <meta name="description" content="PayTrack te ayuda a llevar el control de tus cobros: clientes, cobros pendientes, vencidos y pagos registrados." />
+  <style>
+    :root {
+      --ink: #10231C;
+      --mint: #6EE7B7;
+      --lime: #D9FF6B;
+      --blue: #4F6BFF;
+      --bg: #F3FBF7;
+      --white: #ffffff;
+      --muted: #5C6B66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, #E4FBF1, #E6EDFF);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    header, main, footer { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding-top: 24px; }
+    .brand { font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+    nav a { color: var(--ink); text-decoration: none; margin-left: 18px; font-weight: 600; }
+    .hero { padding: 64px 0 40px; display: grid; gap: 28px; }
+    @media (min-width: 760px) { .hero { grid-template-columns: 1.1fr 0.9fr; align-items: center; } }
+    h1 { font-size: clamp(36px, 6vw, 58px); line-height: 1.05; margin: 0 0 16px; letter-spacing: -1.5px; }
+    .lead { font-size: 18px; color: var(--muted); line-height: 1.5; margin: 0 0 24px; }
+    .badge {
+      display: inline-block; background: var(--ink); color: var(--lime);
+      padding: 14px 22px; border-radius: 999px; font-weight: 700; text-decoration: none;
+    }
+    .card {
+      background: var(--ink); color: var(--white); border-radius: 36px; padding: 28px;
+      position: relative; overflow: hidden;
+    }
+    .card .kicker { opacity: 0.8; font-size: 14px; }
+    .card .big { font-size: 48px; font-weight: 800; color: var(--lime); margin: 6px 0; letter-spacing: -1px; }
+    .card .blob { position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 80px; background: #FFD166; }
+    section { padding: 32px 0; }
+    h2 { font-size: 28px; letter-spacing: -0.5px; margin: 0 0 18px; }
+    .features { display: grid; gap: 14px; }
+    @media (min-width: 760px) { .features { grid-template-columns: repeat(3, 1fr); } }
+    .feature { background: var(--white); border-radius: 28px; padding: 22px; }
+    .feature h3 { margin: 0 0 8px; font-size: 18px; }
+    .feature p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-bottom: 10px; }
+    footer { padding: 40px 20px 56px; color: var(--muted); font-size: 14px; }
+    footer a { color: var(--ink); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">PayTrack</div>
+    <nav>
+      <a href="#funciones">Funciones</a>
+      <a href="privacidad.html">Privacidad</a>
+      <a href="mailto:alexisdeveloper2722@gmail.com">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Cobra a tiempo, sin perder la cuenta.</h1>
+        <p class="lead">PayTrack te ayuda a llevar el control de tus cobros generales: clientes, cobros pendientes, vencidos y pagos registrados, todo desde tu celular.</p>
+        <span class="badge">Próximamente en Google Play</span>
+      </div>
+      <div class="card">
+        <div class="blob"></div>
+        <div class="kicker">Por cobrar</div>
+        <div class="big">S/ 1,250.00</div>
+        <div>4 cobros abiertos · S/ 120.50 vencidos</div>
+      </div>
+    </div>
+
+    <section id="funciones">
+      <h2>Qué puedes hacer</h2>
+      <div class="features">
+        <article class="feature">
+          <span class="dot" style="background: var(--mint)"></span>
+          <h3>Clientes</h3>
+          <p>Guarda a quienes te deben pagar, con su correo y teléfono de contacto.</p>
+        </article>
+        <article class="feature">
+          <span class="dot" style="background: var(--lime)"></span>
+          <h3>Cobros</h3>
+          <p>Crea cobros con concepto, monto y fecha de vencimiento. Ve de un vistazo lo pendiente y lo vencido.</p>
+        </article>
+        <article class="feature">
+          <span class="dot" style="background: var(--blue)"></span>
+          <h3>Pagos</h3>
+          <p>Registra cada pago y lleva el resumen de lo que ya cobraste en el mes.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 PayTrack · <a href="privacidad.html">Política de privacidad</a> · <a href="mailto:alexisdeveloper2722@gmail.com">alexisdeveloper2722@gmail.com</a></p>
+  </footer>
+</body>
+</html>

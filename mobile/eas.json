@@ -16,10 +16,20 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://paytrack-api-romelx23s-projects.vercel.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://pwnehbanrstbhqaibyrm.supabase.co"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "track": "internal",
+        "serviceAccountKeyPath": "./google-service-account.json"
+      }
+    }
   }
 }
